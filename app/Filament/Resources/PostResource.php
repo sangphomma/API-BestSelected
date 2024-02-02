@@ -57,17 +57,19 @@ class PostResource extends Resource
                     Forms\Components\FileUpload::make('cover')
                     ->directory('products-cover')
                     //->preserveFilenames()
-                    ->getUploadedFileNameForStorageUsing(
-                        function(TemporaryUploadedFile $file , Forms\Get $get){
-                            if($get('name')!==''){
-                                $fname=$get('name') ;
-                            }else{
-                                $fname='product' ;
-                            }
-                            return 'cover-'.$fname.'-'.str(now()->timestamp).'.'.str($file->getClientOriginalExtension()) ;
-                        }
-                    )
-                    ->image()
+                    // ->getUploadedFileNameForStorageUsing(
+                    //     function(TemporaryUploadedFile $file , Forms\Get $get){
+                    //         if($get('name')!==''){
+                    //             $fname=$get('name') ;
+                    //         }else{
+                    //             $fname='product' ;
+                    //         }
+                    //         return 'cover-'.$fname.'-'.str(now()->timestamp).'.'.str($file->getClientOriginalExtension()) ;
+                    //     }
+                    // )
+                    ->multiple()
+                    ->storeFileNamesIn('attachment_file_names')
+                    ->image()->reorderable()
                     ->imageEditor(),
 
                 ]),
@@ -76,7 +78,7 @@ class PostResource extends Resource
                     ->directory('products-images')
                     ->multiple()
                     ->storeFileNamesIn('attachment_file_names')
-                    ->image()
+                    ->image()->reorderable()
                     ->imageEditor(),
                 ])
 
