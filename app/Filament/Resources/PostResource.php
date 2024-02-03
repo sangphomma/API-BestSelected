@@ -10,6 +10,7 @@ use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -17,6 +18,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Filament\Forms\Set;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class PostResource extends Resource
 {
@@ -35,9 +39,21 @@ class PostResource extends Resource
                         // ->unique(ignoreRecord:true)
                         ->preload()
                         ->searchable(),
-                    Forms\Components\TextInput::make('name')
+                    TextInput::make('name')
                         ->required()
+                        ->unique(ignoreRecord: true)
+                        ->live(onBlur:true)
+                        ->afterStateUpdated(function($operation, $state, Forms\set $set){
+                                    // if($operation !=='create') return ;
+
+                                    $set('slug', Str::slug($state,'-','TH').'-Update-'.Str::slug(date('d-M-Y', now()->timestamp)) ) ;
+                        }),
+                        TextInput::make('slug')
+                        ->required()
+                        ->unique(ignoreRecord: true)
                         ->maxLength(255),
+                        // ->unique(Post::class, 'slug', fn ($record) => $record)
+                        // ->disabled(fn (?string $operation, ?Model $record) => $operation == 'edit' ),
                     Forms\Components\Toggle::make('published')
                         ->default(true)
                         ->required(),
@@ -50,6 +66,11 @@ class PostResource extends Resource
                     // ->fileAttachmentsVisibility('public')
                     // MarkdownEditor::make('desc'),
                     Textarea::make('desc')
+                    ->autocomplete($autocomplete = 'on') ->rows(30) ,
+                ]),
+                Tab::make('Note')->schema([
+
+                    Textarea::make('note')
                     ->autocomplete($autocomplete = 'on') ->rows(30) ,
                 ]),
                 Tab::make('cover')->schema([
